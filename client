@@ -5,18 +5,21 @@ MAX_MSG_LENGTH = 1024
 PORT = 5555
 IP = "127.0.0.1"
 
+Setup_User = "I want to set up my user"
 
-
-class Commands_For_Server:
+class Server_Funcation:
     def __init__(self, IP, PORT):
         self.my_socket = socket.socket()
         self.my_socket.connect((IP, PORT))
-    def Send_Command(self):
+
+
+
+    def Send_Command(self, command):
         server_request = self.my_socket.recv(MAX_MSG_LENGTH).decode()
-        print(server_request)
-        self.my_socket.send("set my name and password".encode())
+        print("|server sent to client: ", server_request, " |")
+        self.my_socket.send(command.encode())
+        print("|client sent to server: ", command, " |")
 
 
-c = Commands_For_Server(IP, PORT)
-c.Send_Command()
-
+c = Server_Funcation(IP, PORT)
+c.Send_Command(Setup_User)
