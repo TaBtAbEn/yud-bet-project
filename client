@@ -4,10 +4,19 @@ import socket
 MAX_MSG_LENGTH = 1024
 PORT = 5555
 IP = "127.0.0.1"
-my_socket = socket.socket()
-my_socket.connect((IP, PORT))
 
-server_request = my_socket.recv(MAX_MSG_LENGTH).decode()
-print(server_request)
-my_socket.send("set my name and password".encode())
+
+
+class Commands_For_Server:
+    def __init__(self, IP, PORT):
+        self.my_socket = socket.socket()
+        self.my_socket.connect((IP, PORT))
+    def Send_Command(self):
+        server_request = self.my_socket.recv(MAX_MSG_LENGTH).decode()
+        print(server_request)
+        self.my_socket.send("set my name and password".encode())
+
+
+c = Commands_For_Server(IP, PORT)
+c.Send_Command()
 
