@@ -1,25 +1,58 @@
 import socket
-
+#השמת שם ברגע התחברות ושליחת הודעות למשתמשים אחרים
 
 MAX_MSG_LENGTH = 1024
 PORT = 5555
 IP = "127.0.0.1"
 
-Setup_User = "I want to set up my user"
+Setup_User = "set my name and password"
+Close_Connection = "close connection"
+
 
 class Server_Funcation:
     def __init__(self, IP, PORT):
         self.my_socket = socket.socket()
         self.my_socket.connect((IP, PORT))
-
-
-
-    def Send_Command(self, command):
         server_request = self.my_socket.recv(MAX_MSG_LENGTH).decode()
         print("|server sent to client: ", server_request, " |")
+
+
+    #מקבל הודעת תגובה מהשרת
+    def Recv_From_Server(self):
+        server_request = self.my_socket.recv(MAX_MSG_LENGTH).decode()
+        print("|server sent to client: ", server_request, " |")
+
+
+    #ומחזיר בקשה לשרת
+    def Send_Command_To_Server(self, command):
         self.my_socket.send(command.encode())
         print("|client sent to server: ", command, " |")
 
 
-c = Server_Funcation(IP, PORT)
-c.Send_Command(Setup_User)
+class Client_Input:
+    def __init__(self):
+        self.c = Server_Funcation(IP, PORT)
+        self.Choose_Command()
+        #self.c.Recv_From_Server()
+
+
+    #מחליט על הבקשה לשליחה לשרת
+    #משתנה נוסף יתווסף ברגע השמת הגוי והוא יהיה הכפתור עליו המשתמש ילחץ
+    def Choose_Command(self):
+        print("Enter |1|: sing in")
+        print("Enter |2|: close connection")
+        yourAction = input("Your action: ")
+        if yourAction == '1':
+            self.c.Send_Command_To_Server(Setup_User)
+            self.c.Recv_From_Server()
+            userName = input("Enter name: ")
+            self.c.Send_Command_To_Server(userName)
+            self.c.Recv_From_Server()
+            passWord = input("Enter password: ")
+            self.c.Send_Command_To_Server(passWord)
+        if yourAction == '2':
+            self.c.Send_Command_To_Server(Close_Connection)
+
+
+
+a = Client_Input()
