@@ -1,0 +1,73 @@
+import socket
+import PySimpleGUI as pg
+#השמת שם ברגע התחברות ושליחת הודעות למשתמשים אחרים
+
+MAX_MSG_LENGTH = 1024
+PORT = 5555
+IP = "127.0.0.1"
+
+Setup_User = "1"
+Close_Connection = "0"
+
+
+
+
+
+
+
+
+
+
+class Server_Funcation:
+    def __init__(self, IP, PORT):
+        self.my_socket = socket.socket()
+        self.my_socket.connect((IP, PORT))
+
+
+
+    #מקבל הודעת תגובה מהשרת
+    def Recv_From_Server(self):
+        server_request = self.my_socket.recv(MAX_MSG_LENGTH).decode()
+        print("|server sent to client: ", server_request, " |")
+
+
+    #ומחזיר בקשה לשרת
+    def Send_Command_To_Server(self, command):
+        self.my_socket.send(command.encode())
+        print("|client sent to server: ", command, " |")
+
+    def Send_Sing_Up(self, command, name, password):
+        massage = command + name + "©" + password
+        self.my_socket.send(massage.encode())
+
+
+
+class Client_Input:
+    def __init__(self, pg):
+        self.c = Server_Funcation(IP, PORT)
+        self.Choose_Command(pg)
+        #self.c.Recv_From_Server()
+
+
+    #מחליט על הבקשה לשליחה לשרת
+    #משתנה נוסף יתווסף ברגע השמת הגוי והוא יהיה הכפתור עליו המשתמש ילחץ
+    def Choose_Command(self, pg):
+        pg.theme("DarkAmber")
+        layout = [
+            [pg.Text("choose action")],
+            [pg.Button("sign in")], [pg.Button("close connection")]
+        ]
+
+        print("Enter |1|: sign in")
+        print("Enter |0|: close connection")
+        yourAction = input("Your action: ")
+        if yourAction == Setup_User:
+            userName = input("Enter name: ")
+            passWord = input("Enter password: ")
+            self.c.Send_Sing_Up(Setup_User, userName, passWord)
+        if yourAction == Close_Connection:
+            self.c.Send_Command_To_Server(Close_Connection)
+
+
+
+a = Client_Input(pg)
