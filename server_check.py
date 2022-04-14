@@ -37,16 +37,6 @@ while True:
         else:
             data = current_socket.recv(MAX_MSG_LENGTH).decode()
             if data:
-                """
-                    if data[0] == Send_Private:
-                    newdata = data[1:]
-                    newdata = newdata.replace("private", "")
-                    name = newdata
-                    send_msg_private(name)
-                """
-
-
-
                 if data[0] == Setup_User:
                     i = 1
                     data_counter = 1
@@ -55,7 +45,6 @@ while True:
                         name = name + data[i]
                         data_counter = data_counter + 1
                         i = i+1
-                    #print(name)
                     j = 1
                     password = data[data_counter+1:]
                     # ליעל את הפעולה!
@@ -75,6 +64,5 @@ while True:
 "ori": socket
 "gilad: 
 """
-
 
 
