@@ -45,77 +45,120 @@ class Server_Funcation:
 class Client_Input:
     def __init__(self, sg):
         self.c = Server_Funcation(IP, PORT)
-        self.win = Gui_Windows(sg)
-        self.Choose_Command(self.win)
+        self.win = Gui_Layout(sg)
+        self.Gui_Functions(self.win)
         #self.c.Recv_From_Server()
 
 
     #מחליט על הבקשה לשליחה לשרת
     #משתנה נוסף יתווסף ברגע השמת הגוי והוא יהיה הכפתור עליו המשתמש ילחץ
-    def Choose_Command(self, win):
-        window1, window2 = self.win.wellcome_win(), None  # start off with 1 window open
+    def Gui_Functions(self, win):
+        window1, window2, window3 = self.win.wellcome_win(), None, None
 
-        while True:  # Event Loop
-            window, event, values = sg.read_all_windows()
-            if event == sg.WIN_CLOSED or event == 'Exit':
-                window.close()
-                if window == window2:  # if closing win 2, mark as closed
-                    window2 = None
-                elif window == window1:  # if closing win 1, exit program
+        while True:
+            window, event, value = sg.read_all_windows()
+            if window == window1 and event in (sg.WIN_CLOSED, 'Exit'):
+                # סגירת חיבור לשרת
+                self.c.Send_Command_To_Server(Close_Connection)
+                break
+
+            if window == window1:
+
+                if event == '-NAME-':
+                    if value["-NAME-"] == '':
+                        window['-CHECK_NAME-'].update('User name not acceptable')
+                    else:
+                        window['-CHECK_NAME-'].update('User name acceptable')
+                elif event == '-PASSWORD-':
+                    if value["-PASSWORD-"] == '':
+                        window['-CHECK_PASSWORD-'].update('Password not acceptable')
+                    else:
+                        window['-CHECK_PASSWORD-'].update('Password acceptable')
+                elif event == 'Enter':
+                    # הוספה בדיקה שכל הערכים ניתנים להרשמה
+                    canEnter = True
+                    userName = value["-NAME-"]
+                    passWord = value["-PASSWORD-"]
+                    if userName == '' or userName == '':
+                        canEnter = False
+                    print(userName)
+                    print(passWord)
+                    if canEnter:
+                        # שליחה לשרת
+                        self.c.Send_Sing_Up(Setup_User, userName, passWord)
+                        window1.hide()
+                        window2 = self.win.main_win()
+                    elif event == sg.WIN_CLOSED or 'Exit':
+                        # סגירת חיבור לשרת
+                        self.c.Send_Command_To_Server(Close_Connection)
+                        break
+
+            if window == window2:
+                if event == 'All Users Group Chat':
+                    window2.hide()
+                    print('check')
+                    window3 = self.win.chat_win()
+
+                elif event == sg.WIN_CLOSED or 'Exit':
+                    window2.un_hide()
+                    # סגירת חיבור לשרת
                     self.c.Send_Command_To_Server(Close_Connection)
                     break
-            elif event == 'Log in':
-                sg.popup('NOT WORKING', 'all windows remain inactive while popup active')
-            elif event == 'Sign in' and not window2:
-                window2 = self.win.register_win()
-            elif event == '-NAME-':
-                if values["-NAME-"] == '':
-                    window['-CHECK_NAME-'].update('User name not acceptable')
-                else:
-                    window['-CHECK_NAME-'].update('User name acceptable')
-            elif event == '-PASSWORD-':
-                if values["-PASSWORD-"] == '':
-                    window['-CHECK_PASSWORD-'].update('Password not acceptable')
-                else:
-                    window['-CHECK_PASSWORD-'].update('Password acceptable')
 
-            elif event == 'Enter':
-                #הוספה בדיקה שכל הערכים ניתנים להרשמה
-                canEnter = True
-                userName = values["-NAME-"]
-                passWord = values["-PASSWORD-"]
-                if userName == '' or userName == '':
-                    canEnter = False
-                print(userName)
-                print(passWord)
-                if canEnter:
-                    self.c.Send_Sing_Up(Setup_User, userName, passWord)
-                    break
+            if window == window3:
+                if event == 'SEND':
+                    query = value['-QUERY-'].rstrip()
+                    # send the message
+                    # EXECUTE YOUR COMMAND HERE
+                    print('The command you entered was {}'.format(query), flush=True)
+                if event == 'GO BACK':
+                    window3.close()
+                    window2.un_hide()
 
         window.close()
 
 
 
-class Gui_Windows:
+
+class Gui_Layout:
     def __init__(self, sg):
         self.sg = sg
+        #הוספת גדלים צבעים ופונטים אחידים
 
     def wellcome_win(self):
-        layout = [[sg.Text('This is the FIRST WINDOW'), sg.Text('      ', k='-OUTPUT-')],
-                  [sg.Text('If you already have an account press [Log in]')],
-                  [sg.Button('Sign in'), sg.Button('Log in'), sg.Button('Exit')]]
-        return sg.Window('register', layout, location=(800, 600), finalize=True)
+        sign_in = [[sg.Text('SIGN-IN', font='Any 20')],
+                   [sg.Text(size=(25, 1), text='user name')], [sg.Input(key='-NAME-', enable_events=True)],
+                   [sg.Text(size=(25, 1), text='password')], [sg.Input(key='-PASSWORD-', enable_events=True)],
+                   [sg.Text(size=(25, 1), k='-CHECK_NAME-')],
+                   [sg.Text(size=(25, 1), k='-CHECK_PASSWORD-')],
+                   [sg.Button('Enter')]]
 
-    def register_win(self):
-        layout = [[sg.Text('Sign in')],
-                  [sg.Text(size=(25, 1), text='user name')], [sg.Input(key='-NAME-', enable_events=True)],
-                  [sg.Text(size=(25, 1), text='password')], [sg.Input(key='-PASSWORD-', enable_events=True)],
-                  [sg.Text(size=(25, 1), k='-CHECK_NAME-')],
-                  [sg.Text(size=(25, 1), k='-CHECK_PASSWORD-')],
-                  [sg.Button('Enter'), sg.Button('Exit')]]
+        log_in = [[sg.Text('LOG-IN', font='Any 20')],
+                  [sg.T('This is some random text')],
+                  [sg.T('This is some random text')],
+                  [sg.T('This is some random text')],
+                  [sg.T('This is some random text')]]
+
+        layout = [[sg.Column(sign_in, size=(450, 250))], [sg.Column(log_in, size=(450, 320))]]
+
+        return sg.Window('Wellcome page', layout, margins=(0, 0), finalize=True)
+
+    def main_win(self):
+        layout = [[sg.Text('YOUR CHATS')],
+                  [sg.Button('All Users Group Chat')]]
         return sg.Window('Second Window', layout, finalize=True)
 
-
+    def chat_win(self):
+        # שם הקבוצה יהיה עצם שיועבר לפה
+        # תהיה קבלה של המשתמש מהשרת של שם הקבוצה המשתתפים וההודעות
+        layout = [[sg.Text('*Chat name*', size=(40, 1))],
+                  [sg.Output(size=(110, 20), font=('Helvetica 10'))],
+                  [sg.Multiline(size=(70, 5), enter_submits=False, key='-QUERY-', do_not_clear=False),
+                   sg.Button('SEND', button_color=(sg.YELLOWS[0], sg.BLUES[0]), bind_return_key=True),
+                   sg.Button('ok', button_color=(sg.YELLOWS[0], sg.BLUES[0])),
+                   sg.Button('GO BACK', button_color=(sg.YELLOWS[0], sg.GREENS[0]))]]
+        return sg.Window('Chat window', layout, finalize=True, default_button_element_size=(8, 2),
+                         use_default_focus=False)
 
 
 a = Client_Input(sg)
